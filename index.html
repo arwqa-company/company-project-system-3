@@ -64,6 +64,7 @@ const seed={
  entries:[]
 };
 let db=JSON.parse(localStorage.getItem(KEY)||"null")||seed;
+ firestore.collection("companyData").doc("main").get().then(d=>{if(d.exists){db=d.data();localStorage.setItem(KEY,JSON.stringify(db));render();}}).catch(console.error);
 // ترقية تلقائية للبيانات القديمة حتى تظل أكواد الموظفين والمشاريع تعمل بعد التحديثات.
 if(!Array.isArray(db.projects)) db.projects=seed.projects.map(x=>({...x}));
 if(!Array.isArray(db.employees)) db.employees=seed.employees.map(x=>({...x}));
@@ -82,7 +83,7 @@ for(const se of seed.employees){
 saveSafeAfterMigration();
 let session=null;
 function saveSafeAfterMigration(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(_){}}
-function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));firestore.collection("companyData").doc("main").set(db).catch(console.error);}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function today(){return new Date().toISOString().slice(0,10)}
 function projectOf(e){
