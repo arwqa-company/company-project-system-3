@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d2342">
+<link rel="manifest" href="manifest.json">
+<title>أروقة البناء | متابعة المشاريع والعمالة</title>
+<style>
+:root{--navy:#0d2342;--navy2:#173c68;--gold:#e0aa43;--bg:#f5f7fa;--text:#17243a;--muted:#687386;--line:#e2e7ee;--green:#238653;--red:#c83c3c;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif}
+button,input,select,textarea{font:inherit}button{border:0;cursor:pointer}.hidden{display:none!important}
+.login{min-height:100vh;display:grid;place-items:center;padding:22px;background:linear-gradient(145deg,#071a33,#193e6c)}
+.login-card{width:min(450px,100%);background:#fff;border-radius:28px;padding:30px;box-shadow:0 24px 70px #0005}
+.logo{width:72px;height:72px;border-radius:21px;background:var(--navy);color:var(--gold);display:grid;place-items:center;font-size:34px;margin:auto}
+h1{font-size:23px;text-align:center;margin:16px 0 5px}.subtitle{text-align:center;color:var(--muted);margin-bottom:24px}
+label{display:block;font-weight:700;margin:13px 0 7px}input,select,textarea{width:100%;border:1px solid var(--line);background:#fff;border-radius:13px;padding:12px;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+.btn{border-radius:13px;padding:12px 15px;font-weight:800}.primary{width:100%;background:var(--gold);color:#17243a;margin-top:16px}.secondary{background:#eaf0f6;color:var(--navy)}.danger{background:#feecec;color:#a92323}.dark{background:var(--navy);color:#fff}
+.app{min-height:100vh;padding-bottom:82px}.hero{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:22px 18px 34px;border-radius:0 0 34px 34px}
+.top{display:flex;justify-content:space-between;align-items:center}.brand{font-weight:900}.top button{background:#ffffff18;color:#fff;border:1px solid #ffffff25;border-radius:12px;padding:8px 11px}
+.welcome{margin-top:28px}.welcome small{opacity:.8}.welcome h2{margin:5px 0;color:#f2bd55;font-size:30px}.project-chip{margin-top:16px;padding:14px;border:1px solid #ffffff3d;background:#ffffff12;border-radius:17px}
+.wrap{max-width:1100px;margin:-18px auto 0;padding:0 15px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.card{background:#fff;border-radius:20px;padding:18px;box-shadow:0 7px 22px #13233a0b}.action{text-align:center;cursor:pointer;min-height:145px}.action .ico{font-size:30px}.action h3{margin:10px 0 5px;font-size:17px}.muted{color:var(--muted);font-size:13px}
+.summary{margin-top:14px}.summary h3{margin:0 0 13px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{text-align:center;border-left:1px solid var(--line)}.stat:last-child{border-left:0}.num{font-size:25px;font-weight:900}.manager{margin-top:14px}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar .btn{flex:1;min-width:130px}
+.bottom{position:fixed;z-index:20;bottom:0;left:0;right:0;background:var(--navy);color:#fff;display:flex;justify-content:center;gap:30px;padding:11px 8px calc(11px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px #0002}.nav{background:transparent;color:#b9c5d4;text-align:center;min-width:62px}.nav.active{color:#f0b94d}.nav b{display:block;font-size:11px;margin-top:3px}
+.page{max-width:1000px;margin:0 auto;padding:18px 15px 95px}.page-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.page-head h2{margin:0}.table{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 5px 18px #00000008}.tr{display:grid;grid-template-columns:1.3fr 1fr 1.3fr .8fr;gap:10px;padding:13px 15px;border-bottom:1px solid var(--line);align-items:center}.tr.head{font-weight:800;background:#f1f4f8}.badge{display:inline-block;border-radius:999px;padding:5px 9px;font-size:12px;background:#edf6f0;color:var(--green)}
+.form-card{max-width:700px;margin:auto}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.full{grid-column:1/-1}.section-title{margin:20px 0 10px}.savebar{display:flex;gap:10px;margin-top:18px}.savebar .btn{flex:1}
+.empty{text-align:center;padding:35px;color:var(--muted)}.toast{position:fixed;z-index:50;bottom:90px;right:50%;transform:translateX(50%);background:#15253d;color:#fff;padding:12px 18px;border-radius:13px;box-shadow:0 10px 25px #0003}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.tr{grid-template-columns:1fr 1fr}.tr.head{display:none}.tr>div:nth-child(n+3){font-size:12px}}
+@media(max-width:520px){.grid{gap:9px}.card{padding:15px}.action{min-height:125px}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.bottom{gap:9px}.nav{min-width:54px}}
+@media print{.bottom,.page-head button,.toolbar button{display:none!important}.page{padding-bottom:0}.card{box-shadow:none}}</style>
+</head>
+<body><div id="root"></div>
+<script>
+const KEY="arwqa_workforce_v2";
+const seed={
+ projects:[
+  {id:"p1",name:"مشروع مستشفى الإيمان",location:"الرياض - حي النرجس"},
+  {id:"p2",name:"مشروع تجهيز الأرشيف",location:"الرياض"},
+  {id:"p3",name:"مشروع تهيئة الملعب والمضمار",location:"الرياض"},
+  {id:"p4",name:"مشروع التشطيبات",location:"الرياض"}
+ ],
+ employees:[
+  {id:"e1",code:"1001",name:"أحمد محمد",projectId:"p1"},
+  {id:"e2",code:"1002",name:"محمد أحمد",projectId:"p2"},
+  {id:"e3",code:"1003",name:"محمود علي",projectId:"p3"},
+  {id:"e4",code:"1004",name:"عمرو محمد",projectId:"p4"}
+ ],
+ entries:[]
+};
+let db=JSON.parse(localStorage.getItem(KEY)||"null")||seed;
+// ترقية تلقائية للبيانات القديمة حتى تظل أكواد الموظفين والمشاريع تعمل بعد التحديثات.
+if(!Array.isArray(db.projects)) db.projects=seed.projects.map(x=>({...x}));
+if(!Array.isArray(db.employees)) db.employees=seed.employees.map(x=>({...x}));
+if(!Array.isArray(db.entries)) db.entries=[];
+if(!Array.isArray(db.attendanceRecords)) db.attendanceRecords=[];
+// توحيد أكواد الموظفين إلى نصوص، ودعم الصيغ القديمة projectIds/project.
+db.employees=db.employees.map((e,i)=>{
+  let fallback=seed.employees[i]||{};
+  let pid=e.projectId ?? e.project ?? (Array.isArray(e.projectIds)?e.projectIds[0]:null) ?? fallback.projectId;
+  return {...fallback,...e,id:e.id||fallback.id||("e"+(i+1)),code:String(e.code ?? fallback.code ?? "").trim(),projectId:pid};
+});
+// إعادة الموظفين الافتراضيين لو فقدتهم بيانات قديمة، بدون حذف أي موظف أضافه المدير.
+for(const se of seed.employees){
+  if(!db.employees.some(e=>String(e.code).trim()===String(se.code))) db.employees.push({...se,code:String(se.code)});
+}
+saveSafeAfterMigration();
+let session=null;
+function saveSafeAfterMigration(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(_){}}
+function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function today(){return new Date().toISOString().slice(0,10)}
+function projectOf(e){
+ if(!e)return null;
+ let pid=e.projectId ?? e.project ?? (Array.isArray(e.projectIds)?e.projectIds[0]:null);
+ return db.projects.find(p=>String(p.id)===String(pid)) || db.projects[0] || null
+}
+function toast(t){let x=document.createElement("div");x.className="toast";x.textContent=t;document.body.appendChild(x);setTimeout(()=>x.remove(),2200)}
+function login(){
+ root.innerHTML=`<main class="login"><section class="login-card">
+ <div class="logo">🏗️</div><h1>نظام متابعة المشاريع والعمالة</h1><div class="subtitle">شركة أروقة البناء للمقاولات</div>
+ <label>رقم الموظف أو المدير</label><input id="code" inputmode="numeric" placeholder="مثال: 1001">
+ <button class="btn primary" onclick="doLogin()">دخول النظام</button>
+ <div style="text-align:center;color:#777;font-size:12px;margin-top:12px">المدير: 0000 — الموظفون: 1001 / 1002 / 1003 / 1004</div>
+ </section></main>`;
+}
+function doLogin(){
+ let c=document.getElementById("code").value.trim();
+ if(c==="0000"){session={role:"manager"};home();return}
+ let e=db.employees.find(x=>String(x.code??"").trim()===String(c).trim());
+ if(!e){toast("رقم الدخول غير صحيح");return}
+ session={role:"employee",employeeId:e.id};home()
+}
+function currentEmployee(){return db.employees.find(e=>String(e.id)===String(session?.employeeId))}
+function home(){
+ let manager=session.role==="manager", e=currentEmployee(), p=e&&projectOf(e);
+ if(!manager&&!e){toast("تعذر تحميل بيانات الموظف");login();return}
+ if(!manager&&!p){toast("لا يوجد مشروع مرتبط بهذا الموظف. راجع حساب المدير.");return}
+ let stats=manager?{workers:db.entries.filter(x=>x.date===today()).reduce((a,x)=>a+(+x.totalWorkers||0),0),contractors:db.entries.filter(x=>x.date===today()).reduce((a,x)=>a+(+x.contractors||0),0),employees:db.employees.length,notes:db.entries.filter(x=>x.date===today()&&x.notes).length}:{workers:db.entries.filter(x=>x.date===today()&&x.projectId===e.projectId).reduce((a,x)=>a+(+x.totalWorkers||0),0),contractors:db.entries.filter(x=>x.date===today()&&x.projectId===e.projectId).reduce((a,x)=>a+(+x.contractors||0),0),employees:1,notes:db.entries.filter(x=>x.date===today()&&x.projectId===e.projectId&&x.notes).length};
+ root.innerHTML=`<main class="app"><header class="hero"><div class="top"><div class="brand">🏗️ شركة أروقة البناء</div><button onclick="toast('لا توجد تنبيهات جديدة')">🔔</button></div>
+ <div class="welcome"><small>${manager?"مدير النظام":"مسؤول المشروع"}</small><h2>${manager?"أهلاً بك، المدير":"أهلاً بك، "+esc(e.name)}</h2></div>
+ <div class="project-chip"><small>${manager?"وصول كامل للنظام":"مشروعك المخصص"}</small><br><b>${manager?"كل المشاريع والموظفين":"📍 "+esc(p.name)}</b></div></header>
+ <section class="wrap"><div class="grid">
+ ${action("📅","دوام الموظف","تسجيل حضور وانصراف بالوقت الفعلي",()=>attendance())}
+ ${action("👷","العمالة اليومية","تسجيل أنواع وأعداد العمال",()=>labor())}
+ ${action("🤝","المقاولون","تسجيل المقاولين والأفراد",()=>contractors())}
+ ${action("📊","التقارير","تقارير المشاريع ودوام الموظفين",()=>reports())}
+ ${action("📷","صور الموقع","صور المشروع",()=>photos())}
+ ${action("📝","الملاحظات","متابعات الموقع",()=>notes())}
+ ${manager?action("👥","الموظفون","إضافة وربط الموظفين",()=>employeesPage()):""}
+ ${manager?action("🏢","المشاريع","إضافة وإدارة المشاريع",()=>projectsPage()):""}
+ </div>
+ <div class="card summary"><h3>ملخص اليوم — ${today()}</h3><div class="stats">
+ <div class="stat"><div class="num">${stats.workers}</div><div class="muted">إجمالي العمال</div></div>
+ <div class="stat"><div class="num">${stats.contractors}</div><div class="muted">أفراد المقاولين</div></div>
+ <div class="stat"><div class="num">${stats.employees}</div><div class="muted">الموظفون</div></div>
+ <div class="stat"><div class="num">${stats.notes}</div><div class="muted">ملاحظات</div></div></div></div>
+ ${manager?`<div class="card manager"><h3>تحكم المدير</h3><p class="muted">اربط كل موظف بمشروع واحد؛ الموظف لن يرى إلا المشروع المرتبط به.</p><div class="toolbar"><button class="btn dark" onclick="employeesPage()">إدارة الموظفين</button><button class="btn dark" onclick="projectsPage()">إدارة المشاريع</button><button class="btn secondary" onclick="reports()">كل التقارير</button></div></div>`:""}
+ </section>${nav("home")}</main>`;
+}
+function action(i,t,s,fn){return `<div class="card action" onclick="(${fn.toString()})()"><div class="ico">${i}</div><h3>${t}</h3><p class="muted">${s}</p></div>`}
+function nav(active){return `<nav class="bottom"><button class="nav ${active==="home"?"active":""}" onclick="home()">🏠<b>الرئيسية</b></button><button class="nav" onclick="reports()">📊<b>التقارير</b></button><button class="nav" onclick="profile()">👤<b>الملف</b></button><button class="nav" onclick="login()">🚪<b>خروج</b></button></nav>`}
+function projectOptions(){let allowed=session.role==="manager"?db.projects:[projectOf(currentEmployee())];return allowed.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("")}
+function formPage(title,body){root.innerHTML=`<main class="page"><div class="page-head"><h2>${title}</h2><button class="btn secondary" onclick="home()">رجوع</button></div>${body}</main>`}
+
+function nowDate(){
+ let d=new Date();
+ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function nowTime(){
+ let d=new Date();
+ return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+}
+function timeMinutes(t){
+ if(!t)return null;
+ let [h,m]=t.split(":").map(Number);
+ return h*60+m;
+}
+function fmtMinutes(v){
+ v=Math.abs(Math.round(+v||0));
+ let h=Math.floor(v/60),m=v%60;
+ if(h&&m)return h+" ساعة و "+m+" دقيقة";
+ if(h)return h+" ساعة";
+ return m+" دقيقة";
+}
+function calcEmployeeDay(checkIn,checkOut){
+ let start=6*60,end=15*60,cin=timeMinutes(checkIn),cout=timeMinutes(checkOut);
+ let late=cin==null?0:Math.max(0,cin-start);
+ let after=cout==null?0:Math.max(0,cout-end);
+ let balance=cout==null?0:after-late;
+ return {
+   lateMinutes:late,
+   overtimeMinutes:Math.max(0,balance),
+   deductionMinutes:Math.max(0,-balance),
+   balanceMinutes:balance
+ };
+}
+function attendance(){
+ if(session.role==="manager"){monthlyAttendanceReport();return}
+ let e=currentEmployee(),date=nowDate();
+ let r=db.attendanceRecords.find(x=>x.employeeId===e.id&&x.date===date);
+ let p=projectOf(e);
+ formPage("دوام الموظف",`<section class="card form-card">
+ <div class="card" style="box-shadow:none;border:1px solid var(--line);margin-bottom:14px">
+   <b>الدوام الأساسي:</b> 6:00 صباحًا إلى 3:00 مساءً
+   <div class="muted" style="margin-top:5px">صافي ساعات العمل الأساسية: 8 ساعات. وقت الحضور والانصراف يُسجل تلقائيًا لحظة الضغط ولا يمكن كتابته يدويًا.</div>
+ </div>
+ <div><label>المشروع</label><input value="${esc(p?.name||"")}" disabled></div>
+ <div><label>تاريخ اليوم</label><input value="${date}" disabled></div>
+ <div class="card" style="box-shadow:none;border:1px solid var(--line);margin-top:14px">
+   <div><b>الحضور:</b> ${r?.checkIn||"لم يتم التسجيل"}</div>
+   <div style="margin-top:7px"><b>الانصراف:</b> ${r?.checkOut||"لم يتم التسجيل"}</div>
+   ${r?.checkOut?attendanceResultHtml(r):""}
+ </div>
+ <div class="savebar">
+   ${!r?.checkIn?`<button class="btn primary" onclick="checkInNow()">تسجيل حضور الآن</button>`:""}
+   ${r?.checkIn&&!r?.checkOut?`<button class="btn dark" onclick="checkOutNow()">تسجيل انصراف الآن</button>`:""}
+   ${r?.checkOut?`<button class="btn secondary" onclick="monthlyAttendanceReport('${e.id}')">عرض ملخص الشهر</button>`:""}
+ </div>
+ </section>`)
+}
+function attendanceResultHtml(r){
+ let b=+r.balanceMinutes||0;
+ let result=b>0?"إضافي "+fmtMinutes(r.overtimeMinutes):b<0?"خصم "+fmtMinutes(r.deductionMinutes):"لا يوجد إضافي أو خصم";
+ return `<div style="margin-top:10px"><b>تأخير الحضور:</b> ${fmtMinutes(r.lateMinutes)}</div>
+ <div style="margin-top:7px"><b>نتيجة اليوم:</b> ${result}</div>`;
+}
+function checkInNow(){
+ let e=currentEmployee(),date=nowDate(),time=nowTime();
+ let r=db.attendanceRecords.find(x=>x.employeeId===e.id&&x.date===date);
+ if(r?.checkIn){toast("تم تسجيل الحضور بالفعل الساعة "+r.checkIn);return}
+ if(!r){r={employeeId:e.id,projectId:e.projectId,date};db.attendanceRecords.push(r)}
+ r.checkIn=time;
+ let c=calcEmployeeDay(r.checkIn,null);
+ r.lateMinutes=c.lateMinutes;
+ save();
+ toast("تم تسجيل الحضور الساعة "+time);
+ attendance();
+}
+function checkOutNow(){
+ let e=currentEmployee(),date=nowDate(),time=nowTime();
+ let r=db.attendanceRecords.find(x=>x.employeeId===e.id&&x.date===date);
+ if(!r?.checkIn){toast("سجّل الحضور أولًا");return}
+ if(r.checkOut){toast("تم تسجيل الانصراف بالفعل الساعة "+r.checkOut);return}
+ r.checkOut=time;
+ let c=calcEmployeeDay(r.checkIn,r.checkOut);
+ Object.assign(r,c);
+ save();
+ toast("تم تسجيل الانصراف الساعة "+time);
+ attendance();
+}
+function monthlyAttendanceReport(employeeId){
+ let manager=session.role==="manager";
+ let empId=employeeId||(manager?db.employees[0]?.id:currentEmployee()?.id);
+ if(!empId){toast("لا يوجد موظفون");return}
+ let month=nowDate().slice(0,7);
+ formPage(manager?"تقرير دوام الموظفين":"ملخص دوامي",`<section class="card">
+ <div class="toolbar">
+ ${manager?`<div style="min-width:200px;flex:1"><label>الموظف</label><select id="attEmp">${db.employees.map(e=>`<option value="${e.id}" ${e.id===empId?"selected":""}>${esc(e.name)}</option>`).join("")}</select></div>`:""}
+ <div style="min-width:170px"><label>الشهر</label><input id="attMonth" type="month" value="${month}"></div>
+ <button class="btn dark" onclick="renderAttendanceMonth()">عرض</button>
+ <button class="btn secondary" onclick="window.print()">طباعة / PDF</button>
+ </div>
+ <div id="attMonthResult"></div>
+ </section>`);
+ renderAttendanceMonth();
+}
+function renderAttendanceMonth(){
+ let manager=session.role==="manager";
+ let e=manager?db.employees.find(x=>x.id===document.getElementById("attEmp").value):currentEmployee();
+ let month=document.getElementById("attMonth").value;
+ let rows=db.attendanceRecords.filter(r=>r.employeeId===e.id&&r.date.slice(0,7)===month).sort((a,b)=>a.date.localeCompare(b.date));
+ let late=rows.reduce((a,r)=>a+(+r.lateMinutes||0),0);
+ let ot=rows.reduce((a,r)=>a+(+r.overtimeMinutes||0),0);
+ let ded=rows.reduce((a,r)=>a+(+r.deductionMinutes||0),0);
+ let net=ot-ded;
+ document.getElementById("attMonthResult").innerHTML=`
+ <div style="text-align:center;margin:15px 0"><h3>${esc(e.name)}</h3><div class="muted">${month}</div></div>
+ <div class="stats">
+   <div class="stat"><div class="num">${rows.length}</div><div class="muted">أيام الحضور</div></div>
+   <div class="stat"><div class="num">${fmtMinutes(late)}</div><div class="muted">إجمالي التأخير</div></div>
+   <div class="stat"><div class="num">${fmtMinutes(ot)}</div><div class="muted">الإضافي</div></div>
+   <div class="stat"><div class="num">${fmtMinutes(ded)}</div><div class="muted">الخصم</div></div>
+ </div>
+ <div class="card" style="box-shadow:none;border:1px solid var(--line);margin-top:13px;text-align:center">
+   <b>صافي الشهر:</b> ${net>0?"إضافي "+fmtMinutes(net):net<0?"خصم "+fmtMinutes(net):"متوازن"}
+ </div>
+ <div class="table" style="margin-top:13px">
+   ${rows.length?`<div class="tr head"><div>التاريخ</div><div>الحضور / الانصراف</div><div>التأخير</div><div>النتيجة</div></div>`+rows.map(r=>`<div class="tr"><div>${r.date}</div><div>${r.checkIn||"--"} → ${r.checkOut||"--"}</div><div>${fmtMinutes(r.lateMinutes)}</div><div>${r.balanceMinutes>0?"+ "+fmtMinutes(r.overtimeMinutes):r.balanceMinutes<0?"- "+fmtMinutes(r.deductionMinutes):"0 دقيقة"}</div></div>`).join(""):`<div class="empty">لا توجد بيانات دوام لهذا الشهر.</div>`}
+ </div>`;
+}
+function labor(){
+ let e=currentEmployee(), pid=e?.projectId||db.projects[0].id, x=db.entries.find(z=>z.date===today()&&z.projectId===pid)||{};
+ let types=["نجارون","حدادون","عمال عاديون","مبلسين","ألمونيوم","زجاج","دهانون","سباكون","فنيون"];
+ formPage("العمالة اليومية",`<section class="card form-card"><label>المشروع</label><select id="lProject" ${session.role==="employee"?"disabled":""}>${projectOptions()}</select><div class="section-title"><b>أنواع العمالة</b><div class="muted">يمكنك تسجيل الأنواع الموجودة أو إضافة نوع جديد حسب احتياج الموقع.</div></div><div id="laborRows" class="form-grid">${types.map(t=>`<div><label>${t}</label><input class="lt" data-type="${t}" type="number" min="0" value="${x.labor?.[t]||0}"></div>`).join("")}</div><button class="btn secondary" style="margin-top:12px" onclick="addLaborType()">＋ إضافة نوع عمالة</button><div class="form-grid"><div class="full"><label>ملاحظات</label><textarea id="lNotes" rows="3">${esc(x.notes||"")}</textarea></div></div><div class="savebar"><button class="btn primary" onclick="saveLabor()">حفظ العمالة</button></div></section>`)
+}
+function addLaborType(){
+ let name=prompt("اكتب نوع العمالة، مثال: مبلسين / ألمونيوم / زجاج / جبس:");
+ if(!name||!name.trim())return;
+ name=name.trim();
+ if([...document.querySelectorAll('.lt')].some(i=>i.dataset.type===name)){toast("نوع العمالة موجود بالفعل");return}
+ let row=document.createElement('div');
+ row.innerHTML=`<label>${esc(name)}</label><input class="lt" data-type="${esc(name)}" type="number" min="0" value="0">`;
+ document.getElementById('laborRows').appendChild(row);
+}
+function ensureEntry(pid){let x=db.entries.find(z=>z.date===today()&&z.projectId===pid);if(!x){x={date:today(),projectId:pid,labor:{},contractors:0,notes:""};db.entries.push(x)}return x}
+function saveLabor(){
+ let e=currentEmployee(),pid=e?.projectId||document.getElementById("lProject").value,x=ensureEntry(pid);x.labor={};document.querySelectorAll(".lt").forEach(i=>x.labor[i.dataset.type]=+i.value||0);x.totalWorkers=Object.values(x.labor).reduce((a,b)=>a+b,0);x.notes=document.getElementById("lNotes").value;save();toast("تم حفظ العمالة");home()
+}
+function contractors(){
+ let e=currentEmployee(),pid=e?.projectId||db.projects[0].id,x=ensureEntry(pid);
+ let list=x.contractorList||[];
+ if(!list.length) list=[{name:"",count:0,work:""}];
+ formPage("المقاولون اليوم",`<section class="card form-card"><label>المشروع</label><select id="cProject" ${session.role==="employee"?"disabled":""}>${projectOptions()}</select><div class="section-title"><b>المقاولون الموجودون اليوم</b><div class="muted">يمكن تسجيل أكثر من مقاول، ولكل مقاول عدد أفراد ونوع عمل مستقل.</div></div><div id="contractorRows">${list.map((c,i)=>contractorRow(c,i)).join("")}</div><button class="btn secondary" style="margin-top:12px" onclick="addContractorRow()">＋ إضافة مقاول آخر</button><div class="savebar"><button class="btn primary" onclick="saveContractors()">حفظ المقاولين</button></div></section>`)
+}
+function contractorRow(c,i){
+ return `<div class="card contractor-item" style="margin-top:10px;border:1px solid var(--line);box-shadow:none"><div class="form-grid"><div><label>اسم المقاول ${i+1}</label><input class="cn" value="${esc(c.name||"")}" placeholder="مثال: مقاول الزجاج"></div><div><label>عدد الأفراد</label><input class="cc" type="number" min="0" value="${+c.count||0}"></div><div class="full"><label>نوع العمل</label><input class="cw" value="${esc(c.work||"")}" placeholder="مثال: زجاج / ألمونيوم / تشطيبات"></div></div><button class="btn danger" style="margin-top:10px" onclick="this.closest('.contractor-item').remove();refreshContractorLabels()">حذف المقاول</button></div>`
+}
+function addContractorRow(){document.getElementById('contractorRows').insertAdjacentHTML('beforeend',contractorRow({name:"",count:0,work:""},document.querySelectorAll('.contractor-item').length));refreshContractorLabels()}
+function refreshContractorLabels(){[...document.querySelectorAll('.contractor-item')].forEach((el,i)=>{let lab=el.querySelector('label');if(lab)lab.textContent='اسم المقاول '+(i+1)})}
+function saveContractors(){
+ let e=currentEmployee(),pid=e?.projectId||document.getElementById("cProject").value,x=ensureEntry(pid);
+ x.contractorList=[...document.querySelectorAll('.contractor-item')].map(r=>({name:r.querySelector('.cn').value.trim(),count:+r.querySelector('.cc').value||0,work:r.querySelector('.cw').value.trim()})).filter(c=>c.name||c.count||c.work);
+ x.contractors=x.contractorList.reduce((a,c)=>a+c.count,0);
+ x.contractorNames=x.contractorList.map(c=>c.name).filter(Boolean).join('، ');
+ save();toast("تم حفظ المقاولين");home()
+}
+function notes(){let e=currentEmployee(),pid=e?.projectId||db.projects[0].id,x=ensureEntry(pid);formPage("ملاحظات الموقع",`<section class="card form-card"><label>المشروع</label><select id="nProject" ${session.role==="employee"?"disabled":""}>${projectOptions()}</select><label>ملاحظات اليوم</label><textarea id="nText" rows="8">${esc(x.notes||"")}</textarea><button class="btn primary" onclick="let ee=currentEmployee(),pp=ee?.projectId||document.getElementById('nProject').value;let xx=ensureEntry(pp);xx.notes=document.getElementById('nText').value;save();toast('تم حفظ الملاحظات');home()">حفظ الملاحظات</button></section>`)}
+function photos(){formPage("صور الموقع",`<section class="card form-card"><p class="muted">في النسخة الحالية تم تجهيز القسم للربط بالكاميرا والتخزين؛ يمكن إضافة رفع الصور للمشروع في المرحلة التالية.</p><button class="btn dark" onclick="home()">العودة للمشروع</button></section>`)}
+
+function reports(){
+ if(session.role==="employee"){monthlyAttendanceReport(currentEmployee().id);return}
+ formPage("التقارير",`<section class="grid">
+ ${action("👤","تقرير دوام الموظفين","الحضور والتأخير والإضافي شهريًا",()=>monthlyAttendanceReport())}
+ ${action("🏗️","تقارير المشاريع","العمالة والمقاولين اليومية",()=>projectReports())}
+ </section>`)
+}
+function projectReports(){
+ let rows=db.entries.slice().sort((a,b)=>b.date.localeCompare(a.date));
+ formPage("تقارير المشاريع",`<section class="card"><div class="toolbar"><button class="btn dark" onclick="window.print()">طباعة / PDF</button><button class="btn secondary" onclick="home()">الرئيسية</button></div><div class="table">${rows.length?`<div class="tr head"><div>التاريخ</div><div>المشروع</div><div>العمال</div><div>المقاولون</div></div>`+rows.map(x=>`<div class="tr"><div>${x.date}</div><div>${esc(db.projects.find(p=>p.id===x.projectId)?.name||"")}</div><div>${x.totalWorkers||0}</div><div>${x.contractors||0}</div></div>`).join(""):`<div class="empty">لا توجد بيانات مسجلة حتى الآن.</div>`}</div></section>`)
+}
+function reportPrint(){window.print()}
+function employeesPage(){
+ let rows=db.employees.map(e=>`<div class="tr"><div><b>${esc(e.name)}</b><br><small>كود: ${esc(e.code)}</small></div><div><select onchange="assignEmployee('${e.id}',this.value)">${db.projects.map(p=>`<option value="${p.id}" ${p.id===e.projectId?"selected":""}>${esc(p.name)}</option>`).join("")}</select></div><div><span class="badge">مشروع واحد فقط</span></div><div><button class="btn danger" onclick="deleteEmployee('${e.id}')">حذف</button></div></div>`).join("");
+ formPage("إدارة الموظفين",`<section class="card"><div class="toolbar"><button class="btn dark" onclick="addEmployee()">إضافة موظف</button><button class="btn secondary" onclick="home()">رجوع</button></div><div class="table"><div class="tr head"><div>الموظف</div><div>المشروع</div><div>الصلاحية</div><div>إجراء</div></div>${rows}</div></section>`)
+}
+function assignEmployee(id,pid){let e=db.employees.find(x=>x.id===id);e.projectId=pid;save();toast("تم تحديث مشروع الموظف")}
+function addEmployee(){let name=prompt("اسم الموظف:");if(!name)return;let code=prompt("رقم الدخول:");if(!code)return;if(db.employees.some(e=>e.code===code)){toast("الكود مستخدم بالفعل");return}db.employees.push({id:"e"+Date.now(),name,code,projectId:db.projects[0].id});save();employeesPage()}
+function deleteEmployee(id){if(!confirm("حذف الموظف؟"))return;db.employees=db.employees.filter(e=>e.id!==id);save();employeesPage()}
+function projectsPage(){
+ formPage("إدارة المشاريع",`<section class="card"><div class="toolbar"><button class="btn dark" onclick="addProject()">إضافة مشروع</button><button class="btn secondary" onclick="home()">رجوع</button></div><div class="list">${db.projects.map(p=>`<div class="row"><div><b>${esc(p.name)}</b><br><small>${esc(p.location)}</small></div><button class="btn danger" onclick="deleteProject('${p.id}')">حذف</button></div>`).join("")}</div></section>`)
+}
+function addProject(){let name=prompt("اسم المشروع:");if(!name)return;let location=prompt("الموقع:")||"";db.projects.push({id:"p"+Date.now(),name,location});save();projectsPage()}
+function deleteProject(id){if(db.employees.some(e=>e.projectId===id)){toast("لا يمكن حذف مشروع مرتبط بموظف");return}db.projects=db.projects.filter(p=>p.id!==id);save();projectsPage()}
+function profile(){let e=currentEmployee();formPage("الملف الشخصي",`<section class="card form-card"><h3>${session.role==="manager"?"مدير النظام":esc(e.name)}</h3><p class="muted">${session.role==="manager"?"صلاحية كاملة":"المشروع: "+esc(projectOf(e).name)}</p><button class="btn danger" onclick="login()">تسجيل خروج</button></section>`)}
+login();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}</script></body></html>
