@@ -22,28 +22,12 @@ label{display:block;font-weight:700;margin:13px 0 7px}input,select,textarea{widt
 .wrap{max-width:1100px;margin:-18px auto 0;padding:0 15px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.card{background:#fff;border-radius:20px;padding:18px;box-shadow:0 7px 22px #13233a0b}.action{text-align:center;cursor:pointer;min-height:145px}.action .ico{font-size:30px}.action h3{margin:10px 0 5px;font-size:17px}.muted{color:var(--muted);font-size:13px}
 .summary{margin-top:14px}.summary h3{margin:0 0 13px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{text-align:center;border-left:1px solid var(--line)}.stat:last-child{border-left:0}.num{font-size:25px;font-weight:900}.manager{margin-top:14px}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar .btn{flex:1;min-width:130px}
 .bottom{position:fixed;z-index:20;bottom:0;left:0;right:0;background:var(--navy);color:#fff;display:flex;justify-content:center;gap:30px;padding:11px 8px calc(11px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px #0002}.nav{background:transparent;color:#b9c5d4;text-align:center;min-width:62px}.nav.active{color:#f0b94d}.nav b{display:block;font-size:11px;margin-top:3px}
-.page{max-width:1000px;margin:0 auto;padding:18px 15px 95px}.page-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.page-head h2{margin:0}.table{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 5px 18px #50050008}.tr{display:grid;grid-template-columns:1.3fr 1fr 1.3fr .8fr;gap:10px;padding:13px 15px;border-bottom:1px solid var(--line);align-items:center}.tr.head{font-weight:800;background:#f1f4f8}.badge{display:inline-block;border-radius:999px;padding:5px 9px;font-size:12px;background:#edf6f0;color:var(--green)}
+.page{max-width:1000px;margin:0 auto;padding:18px 15px 95px}.page-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.page-head h2{margin:0}.table{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 5px 18px #00000008}.tr{display:grid;grid-template-columns:1.3fr 1fr 1.3fr .8fr;gap:10px;padding:13px 15px;border-bottom:1px solid var(--line);align-items:center}.tr.head{font-weight:800;background:#f1f4f8}.badge{display:inline-block;border-radius:999px;padding:5px 9px;font-size:12px;background:#edf6f0;color:var(--green)}
 .form-card{max-width:700px;margin:auto}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.full{grid-column:1/-1}.section-title{margin:20px 0 10px}.savebar{display:flex;gap:10px;margin-top:18px}.savebar .btn{flex:1}
 .empty{text-align:center;padding:35px;color:var(--muted)}.toast{position:fixed;z-index:50;bottom:90px;right:50%;transform:translateX(50%);background:#15253d;color:#fff;padding:12px 18px;border-radius:13px;box-shadow:0 10px 25px #0003}
 @media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.tr{grid-template-columns:1fr 1fr}.tr.head{display:none}.tr>div:nth-child(n+3){font-size:12px}}
 @media(max-width:520px){.grid{gap:9px}.card{padding:15px}.action{min-height:125px}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.bottom{gap:9px}.nav{min-width:54px}}
 @media print{.bottom,.page-head button,.toolbar button{display:none!important}.page{padding-bottom:0}.card{box-shadow:none}}</style>
- <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
- <script>
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAQ4h15JPW8cPeDwrJdZlqrG1APv-SxVak",
-  authDomain: "company-project-system.firebaseapp.com",
-  projectId: "company-project-system",
-  storageBucket: "company-project-system.firebasestorage.app",
-  messagingSenderId: "301718596879",
-  appId: "1:301718596879:web:2bcd6e21bb6419f113a27a",
-  measurementId: "G-9SNPSJYPQW"
-};
-  firebase.initializeApp(firebaseConfig);
-const firestore = firebase.firestore();
-</script>
 </head>
 <body><div id="root"></div>
 <script>
@@ -64,12 +48,14 @@ const seed={
  entries:[]
 };
 let db=JSON.parse(localStorage.getItem(KEY)||"null")||seed;
- firestore.collection("companyData").doc("main").get().then(d=>{if(d.exists){db=d.data();localStorage.setItem(KEY,JSON.stringify(db));render();}}).catch(console.error);
 // ترقية تلقائية للبيانات القديمة حتى تظل أكواد الموظفين والمشاريع تعمل بعد التحديثات.
 if(!Array.isArray(db.projects)) db.projects=seed.projects.map(x=>({...x}));
 if(!Array.isArray(db.employees)) db.employees=seed.employees.map(x=>({...x}));
 if(!Array.isArray(db.entries)) db.entries=[];
 if(!Array.isArray(db.attendanceRecords)) db.attendanceRecords=[];
+if(!Array.isArray(db.sitePhotos)) db.sitePhotos=[];
+if(!db.settings||typeof db.settings!=="object") db.settings={managerCode:"0000"};
+if(!db.settings.managerCode) db.settings.managerCode="0000";
 // توحيد أكواد الموظفين إلى نصوص، ودعم الصيغ القديمة projectIds/project.
 db.employees=db.employees.map((e,i)=>{
   let fallback=seed.employees[i]||{};
@@ -83,7 +69,7 @@ for(const se of seed.employees){
 saveSafeAfterMigration();
 let session=null;
 function saveSafeAfterMigration(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(_){}}
-function save(){localStorage.setItem(KEY,JSON.stringify(db));firestore.collection("companyData").doc("main").set(db).catch(console.error);}
+function save(){localStorage.setItem(KEY,JSON.stringify(db))}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function today(){return new Date().toISOString().slice(0,10)}
 function projectOf(e){
@@ -97,12 +83,12 @@ function login(){
  <div class="logo">🏗️</div><h1>نظام متابعة المشاريع والعمالة</h1><div class="subtitle">شركة أروقة البناء للمقاولات</div>
  <label>رقم الموظف أو المدير</label><input id="code" inputmode="numeric" placeholder="مثال: 1001">
  <button class="btn primary" onclick="doLogin()">دخول النظام</button>
- <div style="text-align:center;color:#777;font-size:12px;margin-top:12px">المدير: 7007 — الموظفون: 1001 / 1002 / 1003 / 1004</div>
+ <div style="text-align:center;color:#777;font-size:12px;margin-top:12px">المدير: 0000 — الموظفون: 1001 / 1002 / 1003 / 1004</div>
  </section></main>`;
 }
 function doLogin(){
  let c=document.getElementById("code").value.trim();
- if(c==="0000"){session={role:"manager"};home();return}
+ if(c===String(db.settings.managerCode||"0000")){session={role:"manager"};home();return}
  let e=db.employees.find(x=>String(x.code??"").trim()===String(c).trim());
  if(!e){toast("رقم الدخول غير صحيح");return}
  session={role:"employee",employeeId:e.id};home()
@@ -125,13 +111,14 @@ function home(){
  ${action("📝","الملاحظات","متابعات الموقع",()=>notes())}
  ${manager?action("👥","الموظفون","إضافة وربط الموظفين",()=>employeesPage()):""}
  ${manager?action("🏢","المشاريع","إضافة وإدارة المشاريع",()=>projectsPage()):""}
+ ${manager?action("⚙️","الإعدادات","تغيير أكواد دخول المدير والموظفين",()=>settingsPage()):""}
  </div>
  <div class="card summary"><h3>ملخص اليوم — ${today()}</h3><div class="stats">
  <div class="stat"><div class="num">${stats.workers}</div><div class="muted">إجمالي العمال</div></div>
  <div class="stat"><div class="num">${stats.contractors}</div><div class="muted">أفراد المقاولين</div></div>
  <div class="stat"><div class="num">${stats.employees}</div><div class="muted">الموظفون</div></div>
  <div class="stat"><div class="num">${stats.notes}</div><div class="muted">ملاحظات</div></div></div></div>
- ${manager?`<div class="card manager"><h3>تحكم المدير</h3><p class="muted">اربط كل موظف بمشروع واحد؛ الموظف لن يرى إلا المشروع المرتبط به.</p><div class="toolbar"><button class="btn dark" onclick="employeesPage()">إدارة الموظفين</button><button class="btn dark" onclick="projectsPage()">إدارة المشاريع</button><button class="btn secondary" onclick="reports()">كل التقارير</button></div></div>`:""}
+ ${manager?`<div class="card manager"><h3>تحكم المدير</h3><p class="muted">اربط كل موظف بمشروع واحد؛ الموظف لن يرى إلا المشروع المرتبط به.</p><div class="toolbar"><button class="btn dark" onclick="employeesPage()">إدارة الموظفين</button><button class="btn dark" onclick="projectsPage()">إدارة المشاريع</button><button class="btn dark" onclick="settingsPage()">الإعدادات</button><button class="btn secondary" onclick="reports()">كل التقارير</button></div></div>`:""}
  </section>${nav("home")}</main>`;
 }
 function action(i,t,s,fn){return `<div class="card action" onclick="(${fn.toString()})()"><div class="ico">${i}</div><h3>${t}</h3><p class="muted">${s}</p></div>`}
@@ -302,7 +289,48 @@ function saveContractors(){
  save();toast("تم حفظ المقاولين");home()
 }
 function notes(){let e=currentEmployee(),pid=e?.projectId||db.projects[0].id,x=ensureEntry(pid);formPage("ملاحظات الموقع",`<section class="card form-card"><label>المشروع</label><select id="nProject" ${session.role==="employee"?"disabled":""}>${projectOptions()}</select><label>ملاحظات اليوم</label><textarea id="nText" rows="8">${esc(x.notes||"")}</textarea><button class="btn primary" onclick="let ee=currentEmployee(),pp=ee?.projectId||document.getElementById('nProject').value;let xx=ensureEntry(pp);xx.notes=document.getElementById('nText').value;save();toast('تم حفظ الملاحظات');home()">حفظ الملاحظات</button></section>`)}
-function photos(){formPage("صور الموقع",`<section class="card form-card"><p class="muted">في النسخة الحالية تم تجهيز القسم للربط بالكاميرا والتخزين؛ يمكن إضافة رفع الصور للمشروع في المرحلة التالية.</p><button class="btn dark" onclick="home()">العودة للمشروع</button></section>`)}
+function photos(){
+  let manager=session.role==="manager", e=currentEmployee();
+  let pid=manager?(db.projects[0]?.id||""):(e?.projectId||"");
+  let d=today();
+  formPage("صور الموقع",`<section class="card form-card">
+    <div class="form-grid">
+      <div><label>المشروع</label><select id="photoProject" ${manager?"":"disabled"}>${projectOptions()}</select></div>
+      <div><label>التاريخ</label><input id="photoDate" type="date" value="${d}"></div>
+      <div class="full"><label>إضافة صور</label><input id="photoFiles" type="file" accept="image/*" multiple></div>
+      <div class="full">
+        <label>التقاط صورة من الكاميرا</label>
+        <input id="cameraFiles" type="file" accept="image/*" capture="environment" style="display:none" onchange="cameraPicked()">
+        <button type="button" class="btn dark" style="width:100%;font-size:18px" onclick="document.getElementById('cameraFiles').click()">📷 فتح الكاميرا</button>
+        <div id="cameraStatus" class="muted" style="margin-top:7px"></div>
+      </div>
+    </div>
+    <div class="savebar"><button class="btn primary" onclick="saveSitePhotos()">حفظ الصور</button><button class="btn secondary" onclick="renderSitePhotos()">عرض الصور</button></div>
+    <div id="photoGallery" style="margin-top:16px"></div>
+  </section>`);
+  let sel=document.getElementById("photoProject"); if(sel&&pid) sel.value=pid; renderSitePhotos();
+}
+function cameraPicked(){
+  let f=document.getElementById("cameraFiles")?.files?.[0];
+  let s=document.getElementById("cameraStatus");
+  if(s)s.textContent=f?"تم التقاط صورة وجاهزة للحفظ":"";
+}
+function saveSitePhotos(){
+  let pid=document.getElementById("photoProject").value;
+  let date=document.getElementById("photoDate").value||today();
+  let galleryFiles=[...(document.getElementById("photoFiles").files||[])];
+  let cameraFiles=[...(document.getElementById("cameraFiles")?.files||[])];
+  let files=[...galleryFiles,...cameraFiles];
+  if(!files.length){toast("اختر صورة أو التقط صورة بالكاميرا أولًا");return}
+  let pending=files.length;
+  files.forEach(f=>{let r=new FileReader();r.onload=()=>{db.sitePhotos.push({id:"ph"+Date.now()+Math.random(),projectId:pid,date,employeeId:currentEmployee()?.id||null,name:f.name,data:r.result});pending--;if(!pending){save();toast("تم حفظ الصور");renderSitePhotos()}};r.readAsDataURL(f)});
+}
+function renderSitePhotos(){
+  let el=document.getElementById("photoGallery"); if(!el)return;
+  let pid=document.getElementById("photoProject").value; let date=document.getElementById("photoDate").value;
+  let rows=db.sitePhotos.filter(x=>x.projectId===pid&&x.date===date);
+  el.innerHTML=rows.length?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${rows.map(x=>`<div class="card" style="padding:8px;box-shadow:none;border:1px solid var(--line)"><img src="${x.data}" style="width:100%;height:150px;object-fit:cover;border-radius:12px"><div class="muted" style="margin-top:6px">${esc(x.name||"صورة موقع")}</div></div>`).join("")}</div>`:`<div class="empty">لا توجد صور لهذا المشروع في هذا التاريخ.</div>`;
+}
 
 function reports(){
  if(session.role==="employee"){monthlyAttendanceReport(currentEmployee().id);return}
@@ -312,8 +340,32 @@ function reports(){
  </section>`)
 }
 function projectReports(){
- let rows=db.entries.slice().sort((a,b)=>b.date.localeCompare(a.date));
- formPage("تقارير المشاريع",`<section class="card"><div class="toolbar"><button class="btn dark" onclick="window.print()">طباعة / PDF</button><button class="btn secondary" onclick="home()">الرئيسية</button></div><div class="table">${rows.length?`<div class="tr head"><div>التاريخ</div><div>المشروع</div><div>العمال</div><div>المقاولون</div></div>`+rows.map(x=>`<div class="tr"><div>${x.date}</div><div>${esc(db.projects.find(p=>p.id===x.projectId)?.name||"")}</div><div>${x.totalWorkers||0}</div><div>${x.contractors||0}</div></div>`).join(""):`<div class="empty">لا توجد بيانات مسجلة حتى الآن.</div>`}</div></section>`)
+ let month=nowDate().slice(0,7);
+ formPage("تقارير المشاريع",`<section class="card">
+ <div class="toolbar">
+  <div style="min-width:190px;flex:1"><label>نوع التقرير</label><select id="reportMode" onchange="toggleReportProject()"><option value="all">تقرير مجمع لكل المشاريع</option><option value="one">تقرير مشروع محدد</option></select></div>
+  <div id="reportProjectWrap" style="min-width:220px;flex:1;display:none"><label>المشروع</label><select id="reportProject">${db.projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select></div>
+  <div style="min-width:170px"><label>الشهر</label><input id="reportMonth" type="month" value="${month}" onchange="syncReportDayMonth()"></div>
+  <div style="min-width:170px"><label>اليوم (اختياري)</label><input id="reportDate" type="date" value=""></div>
+ </div>
+ <div class="toolbar" style="margin-top:10px"><button class="btn dark" onclick="renderProjectReport()">عرض التقرير</button><button class="btn secondary" onclick="window.print()">طباعة / PDF</button><button class="btn secondary" onclick="home()">الرئيسية</button></div>
+ <div id="projectReportResult"></div></section>`);
+ renderProjectReport();
+}
+function toggleReportProject(){let w=document.getElementById("reportProjectWrap");if(w)w.style.display=document.getElementById("reportMode").value==="one"?"block":"none"}
+function syncReportDayMonth(){
+ let m=document.getElementById("reportMonth")?.value, d=document.getElementById("reportDate");
+ if(d&&d.value&&m&&d.value.slice(0,7)!==m)d.value="";
+}
+function renderProjectReport(){
+ let mode=document.getElementById("reportMode").value, month=document.getElementById("reportMonth").value, day=document.getElementById("reportDate")?.value||"", pid=document.getElementById("reportProject")?.value;
+ let rows=db.entries.filter(x=>{
+   let dateOk=day?String(x.date)===day:(!month||String(x.date).slice(0,7)===month);
+   return dateOk&&(mode==="all"||x.projectId===pid);
+ }).sort((a,b)=>b.date.localeCompare(a.date));
+ let title=mode==="all"?"تقرير مجمع لكل المشاريع":("تقرير مشروع: "+esc(db.projects.find(p=>p.id===pid)?.name||""));
+ let period=day?("اليوم: "+day):(month?("الشهر: "+month):"كل الفترات");
+ document.getElementById("projectReportResult").innerHTML=`<div style="text-align:center;margin:16px 0"><h3>${title}</h3><div class="muted">${period}</div></div><div class="table">${rows.length?`<div class="tr head"><div>التاريخ</div><div>المشروع</div><div>العمال</div><div>المقاولون</div></div>`+rows.map(x=>`<div class="tr"><div>${x.date}</div><div>${esc(db.projects.find(p=>p.id===x.projectId)?.name||"")}</div><div>${x.totalWorkers||0}</div><div>${x.contractors||0}</div></div>`).join(""):`<div class="empty">لا توجد بيانات في اليوم أو الفترة المختارة.</div>`}</div>`;
 }
 function reportPrint(){window.print()}
 function employeesPage(){
@@ -328,6 +380,25 @@ function projectsPage(){
 }
 function addProject(){let name=prompt("اسم المشروع:");if(!name)return;let location=prompt("الموقع:")||"";db.projects.push({id:"p"+Date.now(),name,location});save();projectsPage()}
 function deleteProject(id){if(db.employees.some(e=>e.projectId===id)){toast("لا يمكن حذف مشروع مرتبط بموظف");return}db.projects=db.projects.filter(p=>p.id!==id);save();projectsPage()}
+
+function settingsPage(){
+  if(session.role!=="manager"){toast("هذه الصفحة للمدير فقط");return}
+  formPage("الإعدادات",`<section class="card form-card">
+    <h3>أكواد الدخول</h3>
+    <label>كود دخول المدير</label><input id="managerCodeInput" value="${esc(db.settings.managerCode||"0000")}" inputmode="numeric">
+    <div class="section-title"><b>أكواد الموظفين</b></div>
+    <div id="settingsEmployees">${db.employees.map(e=>`<div class="card" style="box-shadow:none;border:1px solid var(--line);margin-top:10px"><b>${esc(e.name)}</b><label>رقم الدخول / الرقم السري</label><input class="empCodeSetting" data-id="${e.id}" value="${esc(e.code)}"></div>`).join("")}</div>
+    <div class="savebar"><button class="btn primary" onclick="saveSettings()">حفظ الإعدادات</button><button class="btn secondary" onclick="home()">رجوع</button></div>
+  </section>`);
+}
+function saveSettings(){
+  let mc=document.getElementById("managerCodeInput").value.trim(); if(!mc){toast("أدخل كود المدير");return}
+  let codes=[...document.querySelectorAll(".empCodeSetting")].map(i=>({id:i.dataset.id,code:i.value.trim()}));
+  if(codes.some(x=>!x.code)){toast("كل موظف لازم يكون له كود");return}
+  let all=[mc,...codes.map(x=>x.code)]; if(new Set(all).size!==all.length){toast("لا يمكن تكرار أكواد الدخول");return}
+  db.settings.managerCode=mc; codes.forEach(x=>{let e=db.employees.find(e=>e.id===x.id); if(e)e.code=x.code}); save(); toast("تم حفظ الإعدادات"); settingsPage();
+}
+
 function profile(){let e=currentEmployee();formPage("الملف الشخصي",`<section class="card form-card"><h3>${session.role==="manager"?"مدير النظام":esc(e.name)}</h3><p class="muted">${session.role==="manager"?"صلاحية كاملة":"المشروع: "+esc(projectOf(e).name)}</p><button class="btn danger" onclick="login()">تسجيل خروج</button></section>`)}
 login();
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}</script></body></html>
