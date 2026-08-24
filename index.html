@@ -1,5 +1,21 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
+ <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+ <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAQ4h15JPW8cPeDwrJdZlqrG1APv-SxVak",
+  authDomain: "company-project-system.firebaseapp.com",
+  projectId: "company-project-system",
+  storageBucket: "company-project-system.firebasestorage.app",
+  messagingSenderId: "301718596879",
+  appId: "1:301718596879:web:2bcd6e21bb6419f113a27a",
+  measurementId: "G-9SNPSJYPQW"
+};
+
+firebase.initializeApp(firebaseConfig);
+const firestore = firebase.firestore();
+</script>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -66,11 +82,22 @@ db.employees=db.employees.map((e,i)=>{
 for(const se of seed.employees){
   if(!db.employees.some(e=>String(e.code).trim()===String(se.code))) db.employees.push({...se,code:String(se.code)});
 }
+ let session=null;
 saveSafeAfterMigration();
-let session=null;
+ firestore.collection("companyData").doc("main").onSnapshot(doc=>{
+  if(doc.exists){
+    db=doc.data();
+    localStorage.setItem(KEY,JSON.stringify(db));
+    if(session){
+      home();
+    }
+  }
+},console.error);
 function saveSafeAfterMigration(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(_){}}
-function save(){localStorage.setItem(KEY,JSON.stringify(db))}
-function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(db));
+  firestore.collection("companyData").doc("main").set(db).catch(console.error);
+}function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function today(){return new Date().toISOString().slice(0,10)}
 function projectOf(e){
  if(!e)return null;
