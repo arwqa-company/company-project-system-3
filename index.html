@@ -86,7 +86,7 @@ for(const se of seed.employees){
 saveSafeAfterMigration();
  firestore.collection("companyData").doc("main").onSnapshot(doc=>{
   if(doc.exists){
-    db=doc.data();
+   db={...seed,...doc.data(),settings:{managerCode:"0000",...(doc.data().settings||{})}};
     localStorage.setItem(KEY,JSON.stringify(db));
     if(session){
       home();
