@@ -166,7 +166,7 @@ function attendance(){
  formPage("دوام الموظف",`<section class="card form-card">
  <div class="card" style="box-shadow:none;border:1px solid var(--line);margin-bottom:14px">
    <b>الدوام الأساسي:</b> 6:00 صباحًا إلى 3:00 مساءً
-   <div class="muted" style="margin-top:5px">صافي ساعات العمل الأساسية: 8 ساعات. وقت الحضور والانصراف يُسجل تلقائيًا لحظة الضغط ولا يمكن كتابته يدويًا.</div>
+   <div class="muted" style="margin-top:5px">صافي ساعات العمل الأساسية: 8 ساعات. وقت الحضور والانصراف يُسجل تلقائيًا لحظة الضغط ولا يمكن كتابته يدويًا. وسيطلب النظام إذن الموقع GPS عند الحضور والانصراف.</div>
  </div>
  <div><label>المشروع</label><input value="${esc(p?.name||"")}" disabled></div>
  <div><label>تاريخ اليوم</label><input value="${date}" disabled></div>
@@ -185,33 +185,38 @@ function attendance(){
 function attendanceResultHtml(r){
  let b=+r.balanceMinutes||0;
  let result=b>0?"إضافي "+fmtMinutes(r.overtimeMinutes):b<0?"خصم "+fmtMinutes(r.deductionMinutes):"لا يوجد إضافي أو خصم";
- return `<div style="margin-top:10px"><b>تأخير الحضور:</b> ${fmtMinutes(r.lateMinutes)}</div>
- <div style="margin-top:7px"><b>نتيجة اليوم:</b> ${result}</div>`;
+ return `<div style="margin-top:10px"><b>تأخير الحضور:</b> ${fmtMinutes(r.lateMinutes)}</div><div style="margin-top:7px"><b>موقع الحضور:</b> ${gpsLink(r.checkInGps)}</div><div style="margin-top:7px"><b>موقع الانصراف:</b> ${gpsLink(r.checkOutGps)}</div><div style="margin-top:7px"><b>نتيجة اليوم:</b> ${result}</div>`;
 }
-function checkInNow(){
+function getCurrentGps(){
+ return new Promise((resolve,reject)=>{
+  if(!navigator.geolocation){reject(new Error("GPS غير مدعوم على هذا الجهاز"));return}
+  navigator.geolocation.getCurrentPosition(p=>resolve({lat:p.coords.latitude,lng:p.coords.longitude,accuracy:Math.round(p.coords.accuracy||0),capturedAt:new Date().toISOString()}),e=>reject(e),{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+ });
+}
+function gpsLink(g){if(!g||g.lat==null||g.lng==null)return "غير متاح";return `<a href="https://www.google.com/maps?q=${g.lat},${g.lng}" target="_blank" rel="noopener">📍 فتح الموقع</a>${g.accuracy?` <small class="muted">±${g.accuracy}م</small>`:""}`}
+async function checkInNow(){
  let e=currentEmployee(),date=nowDate(),time=nowTime();
  let r=db.attendanceRecords.find(x=>x.employeeId===e.id&&x.date===date);
  if(r?.checkIn){toast("تم تسجيل الحضور بالفعل الساعة "+r.checkIn);return}
+ toast("جاري تحديد الموقع...");
+ let gps=null; try{gps=await getCurrentGps()}catch(err){toast("تعذر تحديد الموقع. فعّل إذن الموقع ثم حاول مرة أخرى");return}
  if(!r){r={employeeId:e.id,projectId:e.projectId,date};db.attendanceRecords.push(r)}
- r.checkIn=time;
- let c=calcEmployeeDay(r.checkIn,null);
- r.lateMinutes=c.lateMinutes;
- save();
- toast("تم تسجيل الحضور الساعة "+time);
- attendance();
+ r.checkIn=time; r.checkInGps=gps;
+ let c=calcEmployeeDay(r.checkIn,null); r.lateMinutes=c.lateMinutes;
+ save(); toast("تم تسجيل الحضور والموقع الساعة "+time); attendance();
 }
-function checkOutNow(){
+async function checkOutNow(){
  let e=currentEmployee(),date=nowDate(),time=nowTime();
  let r=db.attendanceRecords.find(x=>x.employeeId===e.id&&x.date===date);
  if(!r?.checkIn){toast("سجّل الحضور أولًا");return}
  if(r.checkOut){toast("تم تسجيل الانصراف بالفعل الساعة "+r.checkOut);return}
- r.checkOut=time;
- let c=calcEmployeeDay(r.checkIn,r.checkOut);
- Object.assign(r,c);
- save();
- toast("تم تسجيل الانصراف الساعة "+time);
- attendance();
+ toast("جاري تحديد الموقع...");
+ let gps=null; try{gps=await getCurrentGps()}catch(err){toast("تعذر تحديد الموقع. فعّل إذن الموقع ثم حاول مرة أخرى");return}
+ r.checkOut=time; r.checkOutGps=gps;
+ let c=calcEmployeeDay(r.checkIn,r.checkOut); Object.assign(r,c);
+ save(); toast("تم تسجيل الانصراف والموقع الساعة "+time); attendance();
 }
+
 function monthlyAttendanceReport(employeeId){
  let manager=session.role==="manager";
  let empId=employeeId||(manager?db.employees[0]?.id:currentEmployee()?.id);
@@ -249,7 +254,7 @@ function renderAttendanceMonth(){
    <b>صافي الشهر:</b> ${net>0?"إضافي "+fmtMinutes(net):net<0?"خصم "+fmtMinutes(net):"متوازن"}
  </div>
  <div class="table" style="margin-top:13px">
-   ${rows.length?`<div class="tr head"><div>التاريخ</div><div>الحضور / الانصراف</div><div>التأخير</div><div>النتيجة</div></div>`+rows.map(r=>`<div class="tr"><div>${r.date}</div><div>${r.checkIn||"--"} → ${r.checkOut||"--"}</div><div>${fmtMinutes(r.lateMinutes)}</div><div>${r.balanceMinutes>0?"+ "+fmtMinutes(r.overtimeMinutes):r.balanceMinutes<0?"- "+fmtMinutes(r.deductionMinutes):"0 دقيقة"}</div></div>`).join(""):`<div class="empty">لا توجد بيانات دوام لهذا الشهر.</div>`}
+   ${rows.length?`<div class="tr head" style="grid-template-columns:1fr 1.2fr 1.4fr .8fr"><div>التاريخ</div><div>الحضور / الانصراف</div><div>الموقع</div><div>النتيجة</div></div>`+rows.map(r=>`<div class="tr" style="grid-template-columns:1fr 1.2fr 1.4fr .8fr"><div>${r.date}</div><div>${r.checkIn||"--"} → ${r.checkOut||"--"}<br><small>تأخير: ${fmtMinutes(r.lateMinutes)}</small></div><div><b>حضور:</b> ${gpsLink(r.checkInGps)}<br><b>انصراف:</b> ${gpsLink(r.checkOutGps)}</div><div>${r.balanceMinutes>0?"+ "+fmtMinutes(r.overtimeMinutes):r.balanceMinutes<0?"- "+fmtMinutes(r.deductionMinutes):"0 دقيقة"}</div></div>`).join(""):`<div class="empty">لا توجد بيانات دوام لهذا الشهر.</div>`}
  </div>`;
 }
 function labor(){
@@ -292,23 +297,26 @@ function notes(){let e=currentEmployee(),pid=e?.projectId||db.projects[0].id,x=e
 function photos(){
   let manager=session.role==="manager", e=currentEmployee();
   let pid=manager?(db.projects[0]?.id||""):(e?.projectId||"");
-  let d=today();
-  formPage("صور الموقع",`<section class="card form-card">
+  let d=today(), month=d.slice(0,7);
+  formPage(manager?"صور الموقع — لوحة المدير":"صور الموقع",`<section class="card form-card">
     <div class="form-grid">
       <div><label>المشروع</label><select id="photoProject" ${manager?"":"disabled"}>${projectOptions()}</select></div>
-      <div><label>التاريخ</label><input id="photoDate" type="date" value="${d}"></div>
-      <div class="full"><label>إضافة صور</label><input id="photoFiles" type="file" accept="image/*" multiple></div>
-      <div class="full">
-        <label>التقاط صورة من الكاميرا</label>
-        <input id="cameraFiles" type="file" accept="image/*" capture="environment" style="display:none" onchange="cameraPicked()">
-        <button type="button" class="btn dark" style="width:100%;font-size:18px" onclick="document.getElementById('cameraFiles').click()">📷 فتح الكاميرا</button>
-        <div id="cameraStatus" class="muted" style="margin-top:7px"></div>
-      </div>
+      ${manager?`<div><label>الشهر</label><input id="photoMonth" type="month" value="${month}" onchange="syncPhotoFilters()"></div>`:""}
+      <div><label>اليوم ${manager?"(اختياري)":""}</label><input id="photoDate" type="date" value="${manager?"":d}" onchange="renderSitePhotos()"></div>
+      ${!manager?`<div class="full"><label>إضافة صور من الجهاز</label><input id="photoFiles" type="file" accept="image/*" multiple></div>
+      <div class="full"><label>التقاط صورة من الكاميرا</label><input id="cameraFiles" type="file" accept="image/*" capture="environment" style="display:none" onchange="cameraPicked()"><button type="button" class="btn dark" style="width:100%;font-size:18px" onclick="document.getElementById('cameraFiles').click()">📷 فتح الكاميرا</button><div id="cameraStatus" class="muted" style="margin-top:7px"></div></div>`:""}
     </div>
-    <div class="savebar"><button class="btn primary" onclick="saveSitePhotos()">حفظ الصور</button><button class="btn secondary" onclick="renderSitePhotos()">عرض الصور</button></div>
+    <div class="savebar">${!manager?`<button class="btn primary" onclick="saveSitePhotos()">حفظ الصور</button>`:""}<button class="btn secondary" onclick="renderSitePhotos()">عرض الصور</button></div>
+    ${manager?`<div class="muted" style="margin-top:10px">يمكنك اختيار المشروع والشهر، وترك اليوم فارغًا لعرض كل صور الشهر، أو اختيار يوم محدد.</div>`:""}
     <div id="photoGallery" style="margin-top:16px"></div>
   </section>`);
-  let sel=document.getElementById("photoProject"); if(sel&&pid) sel.value=pid; renderSitePhotos();
+  let sel=document.getElementById("photoProject"); if(sel&&pid) sel.value=pid;
+  if(manager){sel?.addEventListener('change',renderSitePhotos);document.getElementById('photoMonth')?.addEventListener('change',renderSitePhotos)}
+  renderSitePhotos();
+}
+function syncPhotoFilters(){
+  let m=document.getElementById("photoMonth")?.value, d=document.getElementById("photoDate");
+  if(d&&d.value&&m&&d.value.slice(0,7)!==m)d.value="";
 }
 function cameraPicked(){
   let f=document.getElementById("cameraFiles")?.files?.[0];
@@ -318,19 +326,25 @@ function cameraPicked(){
 function saveSitePhotos(){
   let pid=document.getElementById("photoProject").value;
   let date=document.getElementById("photoDate").value||today();
-  let galleryFiles=[...(document.getElementById("photoFiles").files||[])];
+  let galleryFiles=[...(document.getElementById("photoFiles")?.files||[])];
   let cameraFiles=[...(document.getElementById("cameraFiles")?.files||[])];
   let files=[...galleryFiles,...cameraFiles];
   if(!files.length){toast("اختر صورة أو التقط صورة بالكاميرا أولًا");return}
-  let pending=files.length;
-  files.forEach(f=>{let r=new FileReader();r.onload=()=>{db.sitePhotos.push({id:"ph"+Date.now()+Math.random(),projectId:pid,date,employeeId:currentEmployee()?.id||null,name:f.name,data:r.result});pending--;if(!pending){save();toast("تم حفظ الصور");renderSitePhotos()}};r.readAsDataURL(f)});
+  let pending=files.length, emp=currentEmployee();
+  files.forEach(f=>{let r=new FileReader();r.onload=()=>{db.sitePhotos.push({id:"ph"+Date.now()+Math.random(),projectId:pid,date,employeeId:emp?.id||null,employeeName:emp?.name||"",name:f.name,data:r.result,createdAt:new Date().toISOString()});pending--;if(!pending){save();toast("تم حفظ الصور");renderSitePhotos()}};r.readAsDataURL(f)});
 }
 function renderSitePhotos(){
   let el=document.getElementById("photoGallery"); if(!el)return;
-  let pid=document.getElementById("photoProject").value; let date=document.getElementById("photoDate").value;
-  let rows=db.sitePhotos.filter(x=>x.projectId===pid&&x.date===date);
-  el.innerHTML=rows.length?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${rows.map(x=>`<div class="card" style="padding:8px;box-shadow:none;border:1px solid var(--line)"><img src="${x.data}" style="width:100%;height:150px;object-fit:cover;border-radius:12px"><div class="muted" style="margin-top:6px">${esc(x.name||"صورة موقع")}</div></div>`).join("")}</div>`:`<div class="empty">لا توجد صور لهذا المشروع في هذا التاريخ.</div>`;
+  let manager=session.role==="manager";
+  let pid=document.getElementById("photoProject")?.value;
+  let date=document.getElementById("photoDate")?.value||"";
+  let month=manager?(document.getElementById("photoMonth")?.value||""):date.slice(0,7);
+  let rows=db.sitePhotos.filter(x=>x.projectId===pid && (date?x.date===date:(!month||x.date.slice(0,7)===month))).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  if(!rows.length){el.innerHTML=`<div class="empty">لا توجد صور مطابقة للمشروع والفترة المختارة.</div>`;return}
+  let groups={}; rows.forEach(x=>(groups[x.date]??=[]).push(x));
+  el.innerHTML=Object.keys(groups).sort().reverse().map(day=>`<div class="card" style="box-shadow:none;border:1px solid var(--line);margin-top:12px"><h3 style="margin-top:0">📅 ${day}</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${groups[day].map(x=>{let emp=db.employees.find(e=>e.id===x.employeeId);return `<div style="border:1px solid var(--line);border-radius:14px;padding:8px"><img src="${x.data}" onclick="openPhoto('${x.id}')" style="width:100%;height:160px;object-fit:cover;border-radius:10px;cursor:pointer"><div class="muted" style="margin-top:6px">${manager?`👤 ${esc(emp?.name||x.employeeName||"غير محدد")}<br>`:""}${esc(x.name||"صورة موقع")}</div></div>`}).join("")}</div></div>`).join("");
 }
+function openPhoto(id){let x=db.sitePhotos.find(p=>p.id===id);if(!x)return;let w=window.open();if(w)w.document.write(`<title>صورة الموقع</title><body style="margin:0;background:#111;display:grid;place-items:center;min-height:100vh"><img src="${x.data}" style="max-width:100%;max-height:100vh;object-fit:contain"></body>`)}
 
 function reports(){
  if(session.role==="employee"){monthlyAttendanceReport(currentEmployee().id);return}
